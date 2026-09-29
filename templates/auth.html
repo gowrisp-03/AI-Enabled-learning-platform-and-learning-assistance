@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumen · {{ 'Create your account' if mode == 'register' else 'Welcome back' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body class="auth-body">
+    <main class="auth-layout">
+      <section class="auth-story">
+        <div class="brand"><span class="brand-mark">✦</span><span>Lumen</span></div>
+        <div class="story-copy"><span class="section-kicker">YOUR CURIOUSITY, ORGANIZED</span><h1>Make room for<br><em>better questions.</em></h1><p>A calm learning space for untangling ideas, building confidence, and keeping your progress close.</p></div>
+        <div class="story-foot"><span>“</span><p>Learning is not a race to the answer. It is practice in seeing clearly.</p></div>
+      </section>
+      <section class="auth-card-wrap">
+        <div class="auth-card">
+          <div class="auth-header"><span class="section-kicker">{{ 'START HERE' if mode == 'register' else 'WELCOME BACK' }}</span><h2>{{ 'Create your account.' if mode == 'register' else 'Good to see you.' }}</h2><p>{{ 'Your personal learning companion is ready when you are.' if mode == 'register' else 'Pick up where your curiosity left off.' }}</p></div>
+          <form id="auth-form" data-mode="{{ mode }}">
+            {% if mode == 'register' %}<label>YOUR NAME<input id="name" type="text" placeholder="Alex Kim" autocomplete="name" required></label>{% endif %}
+            <label>EMAIL ADDRESS<input id="email" type="email" placeholder="you@example.com" autocomplete="email" required></label>
+            <label>PASSWORD<input id="password" type="password" placeholder="At least 6 characters" minlength="6" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" required></label>
+            <div id="auth-error" class="auth-error" role="alert"></div>
+            <button class="primary-button auth-submit" type="submit">{{ 'Create account' if mode == 'register' else 'Log in' }} <span>↗</span></button>
+          </form>
+          <p class="auth-switch">{{ 'Already have an account?' if mode == 'register' else "Don't have an account?" }} <a href="{{ url_for('login' if mode == 'register' else 'register') }}">{{ 'Log in' if mode == 'register' else 'Create one' }}</a></p>
+        </div>
+        <small class="auth-note">Your account and learning history are stored securely in the app database.</small>
+      </section>
+    </main>
+    <script>
+      const form = document.querySelector('#auth-form');
+      const error = document.querySelector('#auth-error');
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button');
+        const payload = { email: document.querySelector('#email').value, password: document.querySelector('#password').value };
+        if (form.dataset.mode === 'register') payload.name = document.querySelector('#name').value;
+        button.disabled = true; error.textContent = '';
+        try {
+          const response = await fetch(`/api/${form.dataset.mode}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Could not continue.');
+          window.location.href = '/';
+        } catch (err) { error.textContent = err.message; button.disabled = false; }
+      });
+    </script>
+  </body>
+</html>
